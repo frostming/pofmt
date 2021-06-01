@@ -46,6 +46,7 @@ A sample `.pre-commit-config.yaml`:
   rev: '0.1.0'
   hooks:
     - id: pofmt
+      additional_dependencies: ['pangu']  # for handling Chinese documents
 ```
 
 ## Usage

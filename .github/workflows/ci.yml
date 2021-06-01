@@ -43,6 +43,6 @@ jobs:
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pdm install
+        run: pdm install -s zh
       - name: Run Tests
         run: pdm run test
