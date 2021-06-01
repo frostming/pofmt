@@ -1,0 +1,17 @@
+# Changes here will be overwritten by Copier
+_commit: 0.2.1
+_src_path: gh:pdm-project/copier-pdm
+author_email: mianghong@gmail.com
+author_fullname: Frost Ming
+author_username: frostming
+copyright_date: '2021'
+copyright_holder: Frost Ming
+copyright_holder_email: mianghong@gmail.com
+copyright_license: MIT
+project_description: Format your PO files for consistency
+project_name: pofmt
+python_package_distribution_name: pofmt
+python_package_import_name: pofmt
+python_package_requires_python: '>=3.6'
+repository_name: pofmt
+repository_namespace: frostming
