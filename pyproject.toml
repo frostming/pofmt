@@ -5,7 +5,7 @@ build-backend = "pdm.pep517.api"
 [project]
 name = "pofmt"
 version = {use_scm = true}
-description = "Format your PO files for consistency"
+description = "Your missing PO formatter and linter"
 authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"}
 ]

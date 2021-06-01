@@ -1,0 +1,7 @@
+- id: pofmt
+  name: pofmt
+  description: Your missing PO formatter and linter
+  entry: pofmt
+  language: python
+  types: [pofile]
+  minimum_pre_commit_version: 0.15.0

@@ -5,7 +5,14 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Format your PO files for consistency
+Your missing PO formatter and linter
+
+## Features
+
+- Wrap msgid and msgstr with a constant max width.
+- Can act as a [pre-commit](https://pre-commit.com/) hook.
+- Display lint errors in a human readable format.
+- Insert white-spaces between Chinese characters and latin letters with [pangu](https://github.com/vinta/pangu.py)
 
 ## Requirements
 
@@ -27,6 +34,19 @@ $ python -m pip install --user pofmt
 
 If you are formatting PO files with Chinese, it is recommended to install `pofmt[zh]`. This includes
 a handy function to add spaces between CJK characters and latin letters.
+
+## As a pre-commit hook
+
+See [pre-commit](https://pre-commit.com/) for instructions.
+
+A sample `.pre-commit-config.yaml`:
+
+```yaml
+- repo: https://github.com/frostming/pofmt
+  rev: '0.1.0'
+  hooks:
+    - id: pofmt
+```
 
 ## Usage
 
