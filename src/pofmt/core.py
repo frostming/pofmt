@@ -1,8 +1,11 @@
 import argparse
+import codecs
 import difflib
 import glob
+import locale
 import os
 import re
+import sys
 import textwrap
 import typing as t
 from pathlib import Path
@@ -21,6 +24,19 @@ class ParseError(Exception):
 
 def escape_quotes(text: str) -> str:
     return re.sub(r'(?<!\\)"', '\\"', text)
+
+
+def support_unicode():
+    """Check whether operating system supports main symbols or not."""
+    encoding = getattr(sys.stdout, "encoding")
+    if encoding is None:
+        encoding = locale.getpreferredencoding(False)
+
+    try:
+        encoding = codecs.lookup(encoding).name
+    except Exception:
+        encoding = "utf-8"
+    return encoding == "utf-8"
 
 
 class Span(t.NamedTuple):
@@ -141,7 +157,7 @@ class Source:
         has_diff = False
         show_title = False
         for line in difflib.unified_diff(
-            self._original, self.lines, "Original", "Current"
+            self._original, self.lines, "Original", "Current", lineterm=""
         ):
             if show:
                 if not show_title:
@@ -173,6 +189,11 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     identical, changed, errors = 0, 0, 0
+    if support_unicode():
+        ERROR, SUCCESS = "❌", "✨"
+    else:
+        ERROR, SUCCESS = ":(", ":)"
+
     for filename in args.filename:
         if os.path.isdir(filename):
             filename = os.path.join(filename, "**/*.po")
@@ -182,13 +203,13 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
                 if source.fix(args.line_length, args.check):
                     if not args.check:
                         source.write(path)
-                        print(f"✨ {path} is updated")
+                        print(f"{SUCCESS} {path} is updated")
                     changed += 1
                 else:
                     identical += 1
             except ParseError as e:
                 errors += 1
-                print(f"❌ {path} Parse error: {e}")
+                print(f"{ERROR} {path} Parse error: {e}")
                 continue
 
     print(
