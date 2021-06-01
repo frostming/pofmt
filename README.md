@@ -24,3 +24,24 @@ Alternatively, install with `pip` to the user site:
 ```bash
 $ python -m pip install --user pofmt
 ```
+
+If you are formatting PO files with Chinese, it is recommended to install `pofmt[zh]`. This includes
+a handy function to add spaces between CJK characters and latin letters.
+
+## Usage
+
+```
+USAGE: pofmt [-h] [--line-length LINE_LENGTH] [-c] [filename ...]
+       python -m pofmt [-h] [--line-length LINE_LENGTH] [-c] [filename ...]
+
+Format PO files for consistency
+
+positional arguments:
+  filename              Filenames to format, default to all po files under the current directory(recursively)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --line-length LINE_LENGTH
+                        The max length of msgid and msgstr
+  -c, --check           Check only, don't modify files
+```
