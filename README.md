@@ -13,6 +13,7 @@ Your missing PO formatter and linter
 - Can act as a [pre-commit](https://pre-commit.com/) hook.
 - Display lint errors in a human readable format.
 - Insert white-spaces between Chinese characters and latin letters with [pangu](https://github.com/vinta/pangu.py)
+- The widths of CJK characters are multiplied by a factor for visual balance.
 
 ## Requirements
 
