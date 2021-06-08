@@ -66,8 +66,8 @@ msgid ""
 "background information about Flask, then focuses on step-by-step "
 "instructions for web development with Flask."
 msgstr ""
-"这部分的文档大部分是独立章节，以一些关于 Flask 的背景信息开始，然后重点介绍如何使用 "
-"Flask 一步步进行 Web 开发。"
+"这部分的文档大部分是独立章节，以一些关于 Flask "
+"的背景信息开始，然后重点介绍如何使用 Flask 一步步进行 Web 开发。"
 
 #: ../../index.rst:66
 msgid "API Reference"

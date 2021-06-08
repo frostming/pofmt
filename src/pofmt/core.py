@@ -10,6 +10,7 @@ import re
 import sys
 import textwrap
 import typing as t
+import unicodedata
 from pathlib import Path
 
 try:
@@ -28,6 +29,11 @@ def escape_quotes(text: str) -> str:
     return re.sub(r'(?<!\\)"', '\\"', text)
 
 
+def is_full_width(text: str) -> bool:
+    """See https://stackoverflow.com/a/31666966"""
+    return unicodedata.east_asian_width(text) in "WAF"
+
+
 def support_unicode():
     """Check whether operating system supports main symbols or not."""
     encoding = getattr(sys.stdout, "encoding")
@@ -43,16 +49,12 @@ def support_unicode():
 
 @contextlib.contextmanager
 def len_with_cjk_width_factor(factor: float) -> t.Generator[None, None, None]:
-    if pangu is None:
-        yield
-        return
-
     builtin_len = builtins.len
 
     def new_len(text: str) -> int:
         if not isinstance(text, str):
             return builtin_len(text)
-        return int(sum(factor if pangu.ANY_CJK.match(c) else 1 for c in text))
+        return int(sum(factor if is_full_width(c) else 1 for c in text))
 
     builtins.len = new_len
     try:
@@ -210,11 +212,9 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
     )
     parser.add_argument(
         "--cjk-width",
-        "-w",
         type=float,
         default=1.8,
-        help="The width factor of a CJK character, default: 1.8. "
-        "[zh] extra should be installed to enable this feature",
+        help="The width factor of a CJK character, default: 1.8.",
     )
     parser.add_argument(
         "filename",
