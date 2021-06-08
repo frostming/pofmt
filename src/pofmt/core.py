@@ -1,5 +1,7 @@
 import argparse
+import builtins
 import codecs
+import contextlib
 import difflib
 import glob
 import locale
@@ -39,6 +41,26 @@ def support_unicode():
     return encoding == "utf-8"
 
 
+@contextlib.contextmanager
+def len_with_cjk_width_factor(factor: float) -> t.Generator[None, None, None]:
+    if pangu is None:
+        yield
+        return
+
+    builtin_len = builtins.len
+
+    def new_len(text: str) -> int:
+        if not isinstance(text, str):
+            return builtin_len(text)
+        return int(sum(factor if pangu.ANY_CJK.match(c) else 1 for c in text))
+
+    builtins.len = new_len
+    try:
+        yield
+    finally:
+        builtins.len = builtin_len
+
+
 class Span(t.NamedTuple):
     start: int
     end: int
@@ -51,10 +73,14 @@ class Entry:
         self.msgstr = msgstr
 
     @staticmethod
-    def _format_text(title: str, text: str, width: int) -> t.List[str]:
+    def process_text(text: str) -> str:
         text = escape_quotes(text)
         if pangu is not None:
             text = pangu.spacing_text(text)
+        return text
+
+    def _format_text(self, title: str, text: str, width: int) -> t.List[str]:
+        text = self.process_text(text)
         if len(title) + len(text) + 3 <= width:
             # 1 space + 2 quotes = 3
             return [f'{title} "{text}"']
@@ -63,10 +89,11 @@ class Entry:
             for line in textwrap.wrap(text, width - 2, drop_whitespace=False)
         ]
 
-    def format(self, width: int) -> t.List[str]:
-        return self._format_text("msgid", self.msgid, width) + self._format_text(
-            "msgstr", self.msgstr, width
-        )
+    def format(self, width: int, cjk_width_factor: float = 1.8) -> t.List[str]:
+        with len_with_cjk_width_factor(cjk_width_factor):
+            return self._format_text("msgid", self.msgid, width) + self._format_text(
+                "msgstr", self.msgstr, width
+            )
 
 
 class Source:
@@ -147,10 +174,12 @@ class Source:
             self.parse_error("Missing msgstr")
         return Entry(Span(start_line, self.lineno), "".join(msgid), "".join(msgstr))
 
-    def fix(self, line_length: int, show: bool = False) -> bool:
+    def fix(self, line_length: int, cjk_width: float = 1.8, show: bool = False) -> bool:
         self.parse()
         for entry in reversed(self._entries):
-            self.lines[entry.span.start : entry.span.end] = entry.format(line_length)
+            self.lines[entry.span.start : entry.span.end] = entry.format(
+                line_length, cjk_width
+            )
         return self.diff(show)
 
     def diff(self, show: bool = False) -> bool:
@@ -180,6 +209,14 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
         "-c", "--check", action="store_true", help="Check only, don't modify files"
     )
     parser.add_argument(
+        "--cjk-width",
+        "-w",
+        type=float,
+        default=1.8,
+        help="The width factor of a CJK character, default: 1.8. "
+        "[zh] extra should be installed to enable this feature",
+    )
+    parser.add_argument(
         "filename",
         nargs="*",
         default=[os.getcwd()],
@@ -200,7 +237,7 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
         for path in glob.glob(filename, recursive=True):
             source = Source(path)
             try:
-                if source.fix(args.line_length, args.check):
+                if source.fix(args.line_length, args.cjk_width, args.check):
                     if not args.check:
                         source.write(path)
                         print(f"{SUCCESS} {path} is updated")
