@@ -1,6 +1,12 @@
 # Changelog
 
 <!-- insertion marker -->
+[v0.2.1](https://github.com/frostming/pofmt/releases/tag/0.2.1) (2021-06-08)
+----------------------------------------------------------------------------
+
+No significant changes.
+
+
 [v0.2.0](https://github.com/frostming/pofmt/releases/tag/0.2.0) (2021-06-08)
 ----------------------------------------------------------------------------
 
