@@ -52,8 +52,8 @@ A sample `.pre-commit-config.yaml`:
 ## Usage
 
 ```
-USAGE: pofmt [-h] [--line-length LINE_LENGTH] [-c] [filename ...]
-       python -m pofmt [-h] [--line-length LINE_LENGTH] [-c] [filename ...]
+USAGE: pofmt [-h] [--line-length LINE_LENGTH] [-c] [--cjk-width CJK_WIDTH] [filename ...]
+       python -m pofmt [-h] [--line-length LINE_LENGTH] [-c] [--cjk-width CJK_WIDTH] [filename ...]
 
 Format PO files for consistency
 
@@ -65,6 +65,8 @@ optional arguments:
   --line-length LINE_LENGTH
                         The max length of msgid and msgstr
   -c, --check           Check only, don't modify files
+  --cjk-width CJK_WIDTH, -w CJK_WIDTH
+                        The width factor of a CJK character, default: 1.8. [zh] extra should be installed to enable this feature
 ```
 
 ## Sample output
