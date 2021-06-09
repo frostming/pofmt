@@ -19,6 +19,13 @@ except ModuleNotFoundError:
     pangu = None
 
 MESSAGE_RE = r'"(.*)"[ ]*$'
+_cjk_opening_punct = (
+    r"[\uff08\u3008\u300a\u300c\u300e\ufe43\u3014\uffe5\u3010\u201c\u2018]"
+)
+_cjk_closing_punct = (
+    r"[\uff09\u3009\u300b\u300d\u300f\ufe44\u3015\u2026\u2014\uff5e\ufe4f"
+    r"\u3001\u3002\uff0c\uff1f\uff01\uff1a\uff1b\u201d\u2019]"
+)
 
 
 class ParseError(Exception):
@@ -86,10 +93,14 @@ class Entry:
         if len(title) + len(text) + 3 <= width:
             # 1 space + 2 quotes = 3
             return [f'{title} "{text}"']
-        return [f'{title} ""'] + [
-            f'"{line}"'
-            for line in textwrap.wrap(text, width - 2, drop_whitespace=False)
-        ]
+
+        wrapper = textwrap.TextWrapper(width - 2, drop_whitespace=False)
+        wrapper.wordsep_re = re.compile(
+            wrapper.wordsep_re.pattern.rstrip(") \n")
+            + r")|(?<=%s) (?=\w)|(?=%s)))" % (_cjk_closing_punct, _cjk_opening_punct),
+            re.VERBOSE,
+        )
+        return [f'{title} ""'] + [f'"{line}"' for line in wrapper.wrap(text)]
 
     def format(self, width: int, cjk_width_factor: float = 1.8) -> t.List[str]:
         with len_with_cjk_width_factor(cjk_width_factor):
