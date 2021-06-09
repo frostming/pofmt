@@ -76,20 +76,25 @@ class Span(t.NamedTuple):
 
 
 class Entry:
-    def __init__(self, span: Span, msgid: str, msgstr: str) -> None:
+    def __init__(self, span: Span, msgid: t.List[str], msgstr: t.List[str]) -> None:
         self.span = span
         self.msgid = msgid
         self.msgstr = msgstr
 
     @staticmethod
-    def process_text(text: str) -> str:
-        text = escape_quotes(text)
+    def process_text(lines: t.List[str]) -> str:
+        text = escape_quotes("".join(lines))
         if pangu is not None:
             text = pangu.spacing_text(text)
         return text
 
-    def _format_text(self, title: str, text: str, width: int) -> t.List[str]:
-        text = self.process_text(text)
+    def _format_text(
+        self, title: str, lines: t.List[str], width: int, reformat: bool = True
+    ) -> t.List[str]:
+        if not reformat:
+            return [f'{title} "{lines[0]}"'] + [f'"{line}"' for line in lines[1:]]
+
+        text = self.process_text(lines)
         if len(title) + len(text) + 3 <= width:
             # 1 space + 2 quotes = 3
             return [f'{title} "{text}"']
@@ -102,11 +107,13 @@ class Entry:
         )
         return [f'{title} ""'] + [f'"{line}"' for line in wrapper.wrap(text)]
 
-    def format(self, width: int, cjk_width_factor: float = 1.8) -> t.List[str]:
+    def format(
+        self, width: int, cjk_width_factor: float = 1.8, no_msgid: bool = False
+    ) -> t.List[str]:
         with len_with_cjk_width_factor(cjk_width_factor):
-            return self._format_text("msgid", self.msgid, width) + self._format_text(
-                "msgstr", self.msgstr, width
-            )
+            return self._format_text(
+                "msgid", self.msgid, width, reformat=not no_msgid
+            ) + self._format_text("msgstr", self.msgstr, width)
 
 
 class Source:
@@ -185,13 +192,19 @@ class Source:
 
         if not msgstr:
             self.parse_error("Missing msgstr")
-        return Entry(Span(start_line, self.lineno), "".join(msgid), "".join(msgstr))
+        return Entry(Span(start_line, self.lineno), msgid, msgstr)
 
-    def fix(self, line_length: int, cjk_width: float = 1.8, show: bool = False) -> bool:
+    def fix(
+        self,
+        line_length: int,
+        cjk_width: float = 1.8,
+        no_msgid: bool = False,
+        show: bool = False,
+    ) -> bool:
         self.parse()
         for entry in reversed(self._entries):
             self.lines[entry.span.start : entry.span.end] = entry.format(
-                line_length, cjk_width
+                line_length, cjk_width, no_msgid
             )
         return self.diff(show)
 
@@ -225,8 +238,9 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
         "--cjk-width",
         type=float,
         default=1.8,
-        help="The width factor of a CJK character, default: 1.8.",
+        help="The width factor of a CJK character, default: 1.8",
     )
+    parser.add_argument("--no-msgid", action="store_true", help="Don't format msgid")
     parser.add_argument(
         "filename",
         nargs="*",
@@ -248,7 +262,12 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
         for path in glob.glob(filename, recursive=True):
             source = Source(path)
             try:
-                if source.fix(args.line_length, args.cjk_width, args.check):
+                if source.fix(
+                    args.line_length,
+                    cjk_width=args.cjk_width,
+                    no_msgid=args.no_msgid,
+                    show=args.check,
+                ):
                     if not args.check:
                         source.write(path)
                         print(f"{SUCCESS} {path} is updated")

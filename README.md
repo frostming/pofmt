@@ -66,7 +66,8 @@ optional arguments:
                         The max length of msgid and msgstr
   -c, --check           Check only, don't modify files
   --cjk-width CJK_WIDTH
-                        The width factor of a CJK character, default: 1.8.
+                        The width factor of a CJK character, default: 1.8
+  --no-msgid            Don't format msgid
 ```
 
 ## Sample output

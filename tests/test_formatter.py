@@ -19,6 +19,24 @@ def test_format_file_consistent(n):
     assert content == golden.read_text(encoding="utf-8")
 
 
+def test_format_file_with_3x_cjk_width():
+    golden = FIXTURES / "golden_3x_width.po"
+    raw = FIXTURES / "raw.po"
+    s = Source(raw)
+    assert s.fix(76, 3.0)
+    content = "\n".join(s.lines) + "\n"
+    assert content == golden.read_text(encoding="utf-8")
+
+
+def test_format_file_no_msgid():
+    golden = FIXTURES / "golden_no_msgid.po"
+    raw = FIXTURES / "raw.po"
+    s = Source(raw)
+    assert s.fix(76, no_msgid=True)
+    content = "\n".join(s.lines) + "\n"
+    assert content == golden.read_text(encoding="utf-8")
+
+
 @pytest.mark.parametrize(
     "error_text",
     [
