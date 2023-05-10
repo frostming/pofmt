@@ -19,9 +19,7 @@ except ModuleNotFoundError:
     pangu = None
 
 MESSAGE_RE = r'"(.*)"[ ]*$'
-_cjk_opening_punct = (
-    r"[\uff08\u3008\u300a\u300c\u300e\ufe43\u3014\uffe5\u3010\u201c\u2018]"
-)
+_cjk_opening_punct = r"[\uff08\u3008\u300a\u300c\u300e\ufe43\u3014\uffe5\u3010\u201c\u2018]"
 _cjk_closing_punct = (
     r"[\uff09\u3009\u300b\u300d\u300f\ufe44\u3015\u2026\u2014\uff5e\ufe4f"
     r"\u3001\u3002\uff0c\uff1f\uff01\uff1a\uff1b\u201d\u2019]"
@@ -43,7 +41,7 @@ def is_full_width(text: str) -> bool:
 
 def support_unicode():
     """Check whether operating system supports main symbols or not."""
-    encoding = getattr(sys.stdout, "encoding")
+    encoding = sys.stdout.encoding
     if encoding is None:
         encoding = locale.getpreferredencoding(False)
 
@@ -117,12 +115,10 @@ class Entry:
 
 
 class Source:
-    def __init__(
-        self, filename: str, lines: t.Optional[t.Sequence[str]] = None
-    ) -> None:
+    def __init__(self, filename: str, lines: t.Optional[t.Sequence[str]] = None) -> None:
         self.filename = filename
         if lines is None:
-            lines = [line for line in Path(filename).read_text("utf-8").splitlines()]
+            lines = list(Path(filename).read_text("utf-8").splitlines())
         self.lines = lines
         self._original = self.lines[:]
         self.lineno = -1
@@ -231,9 +227,7 @@ def cli(argv: t.Optional[t.Sequence[str]] = None) -> int:
     parser.add_argument(
         "--line-length", type=int, default=76, help="The max length of msgid and msgstr"
     )
-    parser.add_argument(
-        "-c", "--check", action="store_true", help="Check only, don't modify files"
-    )
+    parser.add_argument("-c", "--check", action="store_true", help="Check only, don't modify files")
     parser.add_argument(
         "--cjk-width",
         type=float,
