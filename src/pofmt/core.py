@@ -159,8 +159,10 @@ class Source:
         start_line = self.lineno
 
         for line in self:
-            if not line.strip() or line.startswith("#"):
+            if not line.strip():
                 break
+            if line.startswith("#"):
+                continue
             if line.startswith("msgid"):
                 if msgid:
                     self.lineno -= 1

@@ -37,6 +37,18 @@ def test_format_file_no_msgid():
     assert content == golden.read_text(encoding="utf-8")
 
 
+def test_format_fuzzy_translation_with_previous_msgid():
+    lines = [
+        "#: path/to/file.html:136",
+        "#, fuzzy",
+        '#| msgid "Report (HTML)"',
+        'msgid "Report HTML"',
+        'msgstr "Informe (HTML)"',
+    ]
+    s = Source("test_file", lines)
+    assert not s.fix(76)
+
+
 @pytest.mark.parametrize(
     "error_text",
     [
