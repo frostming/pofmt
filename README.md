@@ -44,7 +44,7 @@ A sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/frostming/pofmt
-  rev: '0.1.0'
+  rev: '0.4.0'
   hooks:
     - id: pofmt
       additional_dependencies: ['pangu']  # for handling Chinese documents
